@@ -162,6 +162,8 @@ namespace ConsoleApplication1
             executionTime.WriteLine("Execution time in milliseconds: " + watch.ElapsedMilliseconds + "ms");
             executionTime.Close();
 
+            Console.WriteLine("");
+            Console.Write("Hit [Enter] to exit the application");
 
             Console.ReadLine();
 
