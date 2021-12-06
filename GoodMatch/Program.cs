@@ -13,12 +13,14 @@ namespace ConsoleApplication1
         static void Main(string[] args)
         {
 
-            List<int> numbers = new List<int>();
-            Regex conditions = new Regex("^[a-zA-Z]");
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+          
             List<User> users = new List<User>();
+
+            // Opening the file
             try
             {
-                string file = @"C:\Users\tysoncoupr\Documents\Visual Studio 2012\Projects\GoodMatch\GoodMatch\matcher.csv";
+                string file = @"matcher.csv";
 
                 string[] rawCsv = System.IO.File.ReadAllLines(file);
 
@@ -46,17 +48,17 @@ namespace ConsoleApplication1
 
             }
 
+            // Creating two sets, one for males, the other for females
             HashSet<string> males = new HashSet<string>();
             HashSet<string> females = new HashSet<string>();
 
+            // grouping users based on gender and adding to respective set
             foreach (var user in users)
             {
 
                 if (user.getGender().Equals("m"))
                 {
-
                     males.Add(user.getName());
-
                 }
                 else if (user.getGender().Equals("f"))
                 {
@@ -64,59 +66,60 @@ namespace ConsoleApplication1
                 }
             }
 
-
+            // temporary lists to hold the new, non duplicate data from each set
             List<String> tempHolderForMales = new List<String>();
-            List<string> tempFemales = new List<string>();
+            List<string> tempHolderForFemales = new List<string>();
 
-            tempFemales = females.ToList();
-
+            // assigning set data to respective list
+            tempHolderForFemales = females.ToList();
             tempHolderForMales = males.ToList();
 
+
+
+            /* creating new User lists that will help track the data better by adding each element in temp list
+             * into its respective gender based User list
+             */
             List<User> newMensList = new List<User>();
             List<User> newWomensList = new List<User>();
 
+            // looping through temp list and adding to User list
             foreach (var man in tempHolderForMales)
             {
                 newMensList.Add(new User(man));
-
             }
 
-            foreach (var woman in tempFemales)
+            foreach (var woman in tempHolderForFemales)
             {
                 newWomensList.Add(new User(woman));
             }
 
 
-
-            // TODO: Implement Equals and HashCode methods for use with Comparator when I wake up
-            // TODO: Make sure to check each male against every female. Finish up on exporting as txt
-
-
-            string checker = "";
-
-
+            
+            // creating new List that will concatenate each male with each female string for testing for matches
+             
             List<string> matches = new List<string>();
 
+            // adding the strings to the matches List
             foreach (var man in newMensList)
             {
-
                 foreach (var woman in newWomensList)
                 {
-
                     matches.Add(man + " matches " + woman);
                 }
             }
 
-
-
-
+            // creating a list that will hold Match objects
+            List<Match> matchesList = new List<Match>();
+            string originalString = "";
+           
             foreach (var match in matches)
             {
 
                 string removeCommas = match.Replace(",", "");
-                checker = removeCommas;
-                string sanitizedString = Regex.Replace(checker, "\\s", "");
+                originalString = removeCommas;
+                string sanitizedString = Regex.Replace(originalString, "\\s", "");
 
+                // using Regex to check for invalid input
                 if (!Regex.IsMatch(sanitizedString, @"^[a-zA-Z]+$"))
                 {
                     Console.Write("The program only allows alphabetical characters. Please restart the program and enter valid input.");
@@ -126,12 +129,39 @@ namespace ConsoleApplication1
                 else
                 {
                     long numToFindPercentageOf = findLongNumber(sanitizedString);
-                    findPercentage(checker, numToFindPercentageOf);
+          
+                    string line = findPercentage(originalString, numToFindPercentageOf);
+
+                    string[] temp = line.Split(' ');
+                    matchesList.Add(new Match(temp[0],temp[2], int.Parse(temp[3])));
                 }
 
-
-
             }
+
+            // sorting Match list objects as per given instructions
+            List<Match> sortedMatchesList = matchesList
+                .OrderByDescending(match => match.getPercentage())
+                .ThenBy(match => match.getMale())
+                .ThenBy(match => match.getFemale()).ToList();
+
+            // creating new txt file
+            TextWriter text = new StreamWriter("output.txt");
+
+            // printing sorted list to console as well as writing to txt file
+            foreach (var match in sortedMatchesList) {
+                text.WriteLine(match);
+                Console.WriteLine(match);    
+            }
+            text.Close();
+            
+            watch.Stop();
+
+           
+            TextWriter executionTime = new StreamWriter(@"execution_times.txt");
+            // saving execution time log into file
+            executionTime.WriteLine("Execution time in milliseconds: " + watch.ElapsedMilliseconds + "ms");
+            executionTime.Close();
+
 
             Console.ReadLine();
 
@@ -140,10 +170,10 @@ namespace ConsoleApplication1
 
         }
 
-
-        public static void findPercentage(string originalString, long numberToGetPercentageFrom)
+        
+        public static string findPercentage(string originalString, long numberToGetPercentageFrom)
         {
-
+            
             long sumOfNumbers = 0;
 
 
@@ -160,13 +190,8 @@ namespace ConsoleApplication1
                 numberToGetPercentageFrom /= 10;
             }
 
-            if ((sumOfNumbers * 10) >= 80)
-            {
+             return   originalString + " " + (sumOfNumbers * 10);
 
-                Console.Write(originalString + " " + (sumOfNumbers * 10) + "%, good match");
-            }
-            else
-                Console.Write(originalString + " " + (sumOfNumbers * 10) + "%");
 
         }
 
@@ -203,7 +228,6 @@ namespace ConsoleApplication1
 
             //  }
 
-            Console.WriteLine();
 
 
 
@@ -220,10 +244,12 @@ namespace ConsoleApplication1
 
             // Console.Write(newNums);
 
-            Console.WriteLine();
-            Console.WriteLine();
+           // Console.WriteLine();
+           // Console.WriteLine();
+           
             // converting the string to long in order to make calculations. Can't store the number as an int as it's too big
             sanitizedNumber = long.Parse(newNums);
+            
             //Console.WriteLine("after sanitisation");
             //Console.Write(sanitizedNumber);
 

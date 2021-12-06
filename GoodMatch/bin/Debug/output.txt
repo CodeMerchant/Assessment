@@ -1,0 +1,12 @@
+Billy matches Billy 80%, great match
+Billy matches Trini 80%, great match
+Jason matches Billy 80%, great match
+Jason matches Trini 80%, great match
+Tommy matches Billy 80%, great match
+Tommy matches Trini 80%, great match
+Zack matches Billy 70%
+Zack matches Trini 70%
+Billy matches Kimberly 20%
+Jason matches Kimberly 20%
+Tommy matches Kimberly 20%
+Zack matches Kimberly 10%
